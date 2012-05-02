@@ -1,4 +1,12 @@
 /**
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * SEB FORK  https://github.com/sebcante/almond/blob/master/almond.js
+ * @see https://github.com/jrburke/almond/issues/19
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ *
+ *
+ *
+ *
  * almond 0.0.3 Copyright (c) 2011, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/almond for details
@@ -11,8 +19,10 @@ var requirejs, require, define;
 
     var defined = {},
         waiting = {},
+        config = {},
         aps = [].slice,
         main, req;
+
 
     if (typeof define === "function") {
         //If a define is already in play via another AMD loader,
@@ -136,7 +146,7 @@ var requirejs, require, define;
         };
     }
 
-    main = function (name, deps, callback, relName,config) {
+    main = function (name, deps, callback, relName) {
         var args = [],
             usingExports,
             cjsModule, depName, i, ret, map;
@@ -206,22 +216,20 @@ var requirejs, require, define;
     };
 
     requirejs = req = function (deps, callback, relName, forceSync) {
-        var config = {};
         if (typeof deps === "string") {
-
             //Just return the module wanted. In this scenario, the
             //deps arg is the module name, and second arg (if passed)
             //is just the relName.
             //Normalize module name, if it contains . or ..
             return callDep(makeMap(deps, callback).f);
         } else if (!deps.splice) {
-            config = deps;
+
             //deps is a config object, not an array.
             //Drop the config stuff on the ground.
             if (callback.splice) {
                 //callback is an array, which means it is a dependency list.
                 //Adjust args if there are dependencies
-                config =deps
+
                 deps = callback;
                 callback = arguments[2];
             } else {
@@ -231,10 +239,10 @@ var requirejs, require, define;
 
         //Simulate async callback;
         if (forceSync) {
-            main(undef, deps, callback, relName, config);
+            main(undef, deps, callback, relName);
         } else {
             setTimeout(function () {
-                main(undef, deps, callback, relName, config);
+                main(undef, deps, callback, relName);
             }, 15);
         }
 
@@ -245,7 +253,9 @@ var requirejs, require, define;
      * Just drops the config on the floor, but returns req in case
      * the config return value is used.
      */
-    req.config = function () {
+    req.config = function (conf) {
+        //remember the config
+        config =conf;
         return req;
     };
 
@@ -273,6 +283,7 @@ var requirejs, require, define;
             main(name, deps, callback);
         }
     };
+
     define.amd = {
         jQuery: true
     };
