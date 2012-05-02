@@ -136,7 +136,7 @@ var requirejs, require, define;
         };
     }
 
-    main = function (name, deps, callback, relName) {
+    main = function (name, deps, callback, relName,config) {
         var args = [],
             usingExports,
             cjsModule, depName, i, ret, map;
@@ -178,7 +178,7 @@ var requirejs, require, define;
                 } else if (defined.hasOwnProperty(depName) || waiting.hasOwnProperty(depName)) {
                     args[i] = callDep(depName);
                 } else if (map.p) {
-                    map.p.load(map.n, makeRequire(relName, true), makeLoad(depName), {});
+                    map.p.load(map.n, makeRequire(relName, true), makeLoad(depName), config);
                     args[i] = defined[depName];
                 } else {
                     throw name + ' missing ' + depName;
@@ -206,6 +206,7 @@ var requirejs, require, define;
     };
 
     requirejs = req = function (deps, callback, relName, forceSync) {
+        var config = {};
         if (typeof deps === "string") {
 
             //Just return the module wanted. In this scenario, the
@@ -214,11 +215,13 @@ var requirejs, require, define;
             //Normalize module name, if it contains . or ..
             return callDep(makeMap(deps, callback).f);
         } else if (!deps.splice) {
+            config = deps;
             //deps is a config object, not an array.
             //Drop the config stuff on the ground.
             if (callback.splice) {
                 //callback is an array, which means it is a dependency list.
                 //Adjust args if there are dependencies
+                config =deps
                 deps = callback;
                 callback = arguments[2];
             } else {
@@ -228,10 +231,10 @@ var requirejs, require, define;
 
         //Simulate async callback;
         if (forceSync) {
-            main(undef, deps, callback, relName);
+            main(undef, deps, callback, relName, config);
         } else {
             setTimeout(function () {
-                main(undef, deps, callback, relName);
+                main(undef, deps, callback, relName, config);
             }, 15);
         }
 
@@ -270,7 +273,6 @@ var requirejs, require, define;
             main(name, deps, callback);
         }
     };
-
     define.amd = {
         jQuery: true
     };
